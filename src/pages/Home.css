@@ -1,0 +1,99 @@
+/* Full page */
+.home-container {
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f5f7fb;
+  min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background-color: white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+  color: #1e3a8a;
+}
+
+.nav-buttons button {
+  margin-left: 10px;
+}
+
+/* Buttons */
+.primary-btn {
+  background-color: #1e3a8a;
+  color: rgb(18, 16, 16);
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.secondary-btn {
+  background-color: transparent;
+  border: 1px solid #1e3a8a;
+  color: #1e3a8a;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.primary-btn:hover {
+  background-color: #163172;
+}
+
+.secondary-btn:hover {
+  background-color: #0a0a0a;
+}
+
+/* Hero Section */
+.hero {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.hero h1 {
+  font-size: 40px;
+  color: #111827;
+}
+
+.highlight {
+  color: #1e3a8a;
+}
+
+.hero p {
+  margin-top: 15px;
+  color: #0e0e0f;
+  font-size: 16px;
+}
+
+.hero-buttons {
+  margin-top: 25px;
+}
+
+/* Stats Section */
+.stats {
+  display: flex;
+  justify-content: space-around;
+  background-color: #1e3a8a;
+  color: rgb(21, 20, 20);
+  padding: 30px 0;
+}
+
+.stat-box {
+  text-align: center;
+}
+
+.stat-box h2 {
+  font-size: 24px;
+}
+
+.stat-box p {
+  font-size: 14px;
+}
