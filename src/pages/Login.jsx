@@ -1,92 +1,97 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import API from "../api/axios";
+import { useNavigate, Link } from "react-router-dom";
+import "./Login.css";
 
 const Login = () => {
-
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: ""
-  });
+  const [role, setRole] = useState("STUDENT");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      setError("Please fill all fields");
-      return;
-    }
-
     try {
-      setLoading(true);
-      setError("");
+      const res = await API.post("/auth/login", {
+        email,
+        password,
+      });
 
-      const res = await API.post("/auth/login", formData);
+      console.log(res.data);
 
-      // ✅ STORE DATA
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem("userId", res.data.userId);
-      localStorage.setItem("role", res.data.role);
-      localStorage.setItem("email", res.data.email);
+      localStorage.setItem("user", JSON.stringify(res.data));
 
-      // ✅ REDIRECT
+      // ✅ use backend role
       if (res.data.role === "ADMIN") {
-        navigate("/admin");
+        navigate("/admin/dashboard");
       } else {
-        navigate("/student");
+        navigate("/student/dashboard");
       }
 
     } catch (err) {
-      console.error(err);
-      setError("Invalid email or password");
-    } finally {
-      setLoading(false);
+      console.log(err.response?.data);
+      alert("Login Failed ❌");
     }
   };
 
   return (
-    <div className="login-container">
+    <div className="login-wrapper">
 
-      <h2>Login</h2>
+      <div className="logo-section">
+        <div className="logo-icon">🎓</div>
+        <h1>ScholarTrack</h1>
+        <p>Scholarship & Financial Aid Manager</p>
+      </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      <div className="login-card">
+        <h2>Sign In</h2>
 
-      <form onSubmit={handleSubmit}>
+        {/* ROLE TOGGLE */}
+        <div className="role-select">
+          <button
+            type="button"
+            className={role === "STUDENT" ? "active" : ""}
+            onClick={() => setRole("STUDENT")}
+          >
+            Student
+          </button>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-        />
+          <button
+            type="button"
+            className={role === "ADMIN" ? "active" : ""}
+            onClick={() => setRole("ADMIN")}
+          >
+            Admin
+          </button>
+        </div>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-        />
+        <form onSubmit={handleLogin}>
+          <label>Email</label>
+          <input
+            type="email"
+            placeholder="Enter email"
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
+          <label>Password</label>
+          <input
+            type="password"
+            placeholder="Enter password"
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-      </form>
+          <button type="submit">Sign In</button>
+        </form>
 
+        <p className="register-text">
+          Don't have an account?{" "}
+          <Link to="/register">Create one</Link>
+        </p>
+
+      </div>
     </div>
   );
 };

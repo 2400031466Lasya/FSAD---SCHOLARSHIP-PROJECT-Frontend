@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import API from "../api/axios";
 import "./Scholarships.css";
 
 const Scholarships = () => {
@@ -7,99 +6,30 @@ const Scholarships = () => {
   const [applications, setApplications] = useState([]);
 
   useEffect(() => {
-    fetchScholarships();
-    fetchApplications();
+
+    const scholarshipData = [
+      { id: 1, title: "PM YASASVI Scholarship", amount: 75000 },
+      { id: 2, title: "INSPIRE Program", amount: 80000 },
+      { id: 3, title: "NTSE Scholarship", amount: 60000 }
+    ];
+
+    setScholarships(scholarshipData);
+
   }, []);
-
-  // ✅ GET ALL SCHOLARSHIPS
-  const fetchScholarships = async () => {
-    try {
-      const res = await API.get("/scholarships"); // ✅ FIXED
-      setScholarships(res.data);
-    } catch (err) {
-      console.error("Error fetching scholarships", err);
-    }
-  };
-
-  // ✅ GET USER APPLICATIONS
-  const fetchApplications = async () => {
-    try {
-      const userId = localStorage.getItem("userId"); // ✅ FIXED
-
-      const res = await API.get(`/applications/user/${userId}`);
-      setApplications(res.data);
-
-    } catch (err) {
-      console.error("Error fetching applications", err);
-    }
-  };
-
-  // ✅ APPLY FUNCTION
-  const handleApply = async (scholarshipId) => {
-    try {
-      const userId = localStorage.getItem("userId");
-      const email = localStorage.getItem("email");
-
-      await API.post("/applications/apply", {
-        userId,
-        scholarshipId,
-        name: "Student",
-        email,
-        phone: "9876543210"
-      });
-
-      alert("Applied Successfully ✅");
-
-      fetchApplications(); // refresh
-
-    } catch (err) {
-      console.error(err);
-      alert("Application Failed ❌");
-    }
-  };
 
   return (
     <div className="scholarships-page">
 
       <h1>Browse Scholarships</h1>
-      <p className="subtitle">
-        Find and apply for financial aid opportunities
-      </p>
-
-      <input
-        type="text"
-        placeholder="Search by title..."
-        className="search"
-      />
 
       <div className="grid">
-        {scholarships.map((s) => {
-
-          const alreadyApplied = applications.some(
-            (a) => a.scholarshipId === s.id
-          );
-
-          return (
-            <div key={s.id} className="card">
-
-              <h3>{s.title}</h3>
-              <p className="desc">{s.description}</p>
-
-              <div className="meta">
-                <span>₹{s.amount}</span>
-                <span>{s.deadline || "N/A"}</span>
-              </div>
-
-              <button
-                onClick={() => handleApply(s.id)}
-                disabled={alreadyApplied}
-              >
-                {alreadyApplied ? "Applied ✅" : "Apply Now"}
-              </button>
-
-            </div>
-          );
-        })}
+        {scholarships.map((s) => (
+          <div key={s.id} className="card">
+            <h3>{s.title}</h3>
+            <p>₹{s.amount}</p>
+            <button>Apply</button>
+          </div>
+        ))}
       </div>
 
     </div>
