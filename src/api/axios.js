@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: "https://fsad-scholarship-project-backend-12.onrender.com/api",
 });
 
 // Attach token automatically
