@@ -1,28 +1,57 @@
-import "./Admin.css";
+import { useEffect, useState } from "react";
+import API from "../api/axios";
+import "../styles/Applications.css";
 
-const AdminApplications = () => {
+const StudentApplications = () => {
+
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+
+    const fetchApplications = async () => {
+      try {
+        const userId = localStorage.getItem("userId");
+        const res = await API.get(`/applications/user/${userId}`);
+        setApplications(res.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplications();
+
+  }, []);
+
+  if (loading) return <h2>Loading...</h2>;
+
   return (
     <div>
-      <div className="page-header">
-        <div>
-          <h1>Applications</h1>
-          <p className="subtitle">
-            Review and manage student applications
+
+      <h1>My Applications</h1>
+      <p className="subtitle">
+        View and track your scholarship applications
+      </p>
+
+      {applications.length === 0 ? (
+        <div className="card center">
+          <p className="muted">
+            You haven’t applied for any scholarships yet.
           </p>
         </div>
-        <select className="filter">
-          <option>All</option>
-          <option>Pending</option>
-          <option>Approved</option>
-        </select>
-      </div>
+      ) : (
+        applications.map((app) => (
+          <div key={app.id} className="card">
+            <h3>{app.scholarshipTitle}</h3>
+            <p>Status: {app.status}</p>
+          </div>
+        ))
+      )}
 
-      <div className="card center">
-        <p className="muted">No applications found.</p>
-      </div>
     </div>
   );
 };
 
-
-export default AdminApplications;
+export default StudentApplications;

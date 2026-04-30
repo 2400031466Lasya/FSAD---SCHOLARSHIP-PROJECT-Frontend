@@ -11,18 +11,24 @@ const Scholarships = () => {
     fetchApplications();
   }, []);
 
-  // ✅ GET ALL SCHOLARSHIPS FROM BACKEND
+  // ✅ GET ALL SCHOLARSHIPS
   const fetchScholarships = async () => {
-  const res = await axios.get("http://localhost:8080/api/scholarships");
-  setScholarships(res.data);
-};
+    try {
+      const res = await API.get("/scholarships"); // ✅ FIXED
+      setScholarships(res.data);
+    } catch (err) {
+      console.error("Error fetching scholarships", err);
+    }
+  };
 
   // ✅ GET USER APPLICATIONS
   const fetchApplications = async () => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
-      const res = await API.get(`/applications/user/${user.id}`);
+      const userId = localStorage.getItem("userId"); // ✅ FIXED
+
+      const res = await API.get(`/applications/user/${userId}`);
       setApplications(res.data);
+
     } catch (err) {
       console.error("Error fetching applications", err);
     }
@@ -31,11 +37,15 @@ const Scholarships = () => {
   // ✅ APPLY FUNCTION
   const handleApply = async (scholarshipId) => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
+      const userId = localStorage.getItem("userId");
+      const email = localStorage.getItem("email");
 
       await API.post("/applications/apply", {
-        userId: user.id,
-        scholarshipId: scholarshipId,
+        userId,
+        scholarshipId,
+        name: "Student",
+        email,
+        phone: "9876543210"
       });
 
       alert("Applied Successfully ✅");
@@ -50,6 +60,7 @@ const Scholarships = () => {
 
   return (
     <div className="scholarships-page">
+
       <h1>Browse Scholarships</h1>
       <p className="subtitle">
         Find and apply for financial aid opportunities
@@ -57,31 +68,27 @@ const Scholarships = () => {
 
       <input
         type="text"
-        placeholder="Search by title or category..."
+        placeholder="Search by title..."
         className="search"
       />
 
       <div className="grid">
         {scholarships.map((s) => {
-          // ✅ check if already applied
+
           const alreadyApplied = applications.some(
             (a) => a.scholarshipId === s.id
           );
 
           return (
             <div key={s.id} className="card">
+
               <h3>{s.title}</h3>
               <p className="desc">{s.description}</p>
 
               <div className="meta">
-                <span>{s.amount}</span>
-                <span>{s.deadline}</span>
-                <span>{s.category}</span>
+                <span>₹{s.amount}</span>
+                <span>{s.deadline || "N/A"}</span>
               </div>
-
-              <p className="eligibility">
-                <strong>Eligibility:</strong> {s.eligibility}
-              </p>
 
               <button
                 onClick={() => handleApply(s.id)}
@@ -89,10 +96,12 @@ const Scholarships = () => {
               >
                 {alreadyApplied ? "Applied ✅" : "Apply Now"}
               </button>
+
             </div>
           );
         })}
       </div>
+
     </div>
   );
 };

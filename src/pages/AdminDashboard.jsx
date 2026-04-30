@@ -1,5 +1,6 @@
 import "./Admin.css";
 import { useState, useEffect } from "react";
+import API from "../api/axios";
 
 const AdminDashboard = () => {
 
@@ -16,47 +17,23 @@ const AdminDashboard = () => {
     amount: ""
   });
 
-  // ✅ LOAD DATA
   useEffect(() => {
-
-    const scholarshipData = [
-      { id: 1, title: "PM YASASVI Scholarship", provider: "Government", amount: 75000 },
-      { id: 2, title: "INSPIRE Program", provider: "DST", amount: 80000 },
-      { id: 3, title: "NTSE Scholarship", provider: "Government", amount: 60000 },
-      { id: 4, title: "PMSSS Scholarship", provider: "Government", amount: 100000 },
-      { id: 5, title: "AICTE Pragati Scholarship", provider: "AICTE", amount: 50000 },
-      { id: 6, title: "AICTE Swanath Scholarship", provider: "AICTE", amount: 50000 },
-      { id: 7, title: "Begum Hazrat Mahal Scholarship", provider: "Government", amount: 40000 },
-      { id: 8, title: "CBSE Merit Scholarship", provider: "CBSE", amount: 30000 },
-      { id: 9, title: "HDFC Parivartan ECSS", provider: "HDFC", amount: 75000 },
-      { id: 10, title: "Infosys STEM Stars", provider: "Infosys", amount: 100000 },
-      { id: 11, title: "Kotak Kanya Scholarship", provider: "Kotak", amount: 150000 },
-      { id: 12, title: "Aditya Birla Scholarship", provider: "Aditya Birla", amount: 125000 },
-      { id: 13, title: "JN Tata Endowment", provider: "Tata", amount: 200000 },
-      { id: 14, title: "Amazon Future Engineer", provider: "Amazon", amount: 100000 },
-      { id: 15, title: "L'Oreal Women in Science", provider: "L'Oreal", amount: 90000 }
-    ];
-
-    const applicationData = [
-      { id: 1, studentName: "deepthi", scholarshipName: "PM YASASVI Scholarship", status: "PENDING" },
-      { id: 2, studentName: "lasya", scholarshipName: "INSPIRE Program", status: "PENDING" },
-      { id: 3, studentName: "sejal", scholarshipName: "NTSE Scholarship", status: "PENDING" },
-      { id: 4, studentName: "varshita", scholarshipName: "PMSSS Scholarship", status: "PENDING" },
-      { id: 5, studentName: "fyzaan", scholarshipName: "AICTE Pragati Scholarship", status: "PENDING" },
-
-      { id: 6, studentName: "chaitra", scholarshipName: "AICTE Swanath Scholarship", status: "APPROVED" },
-      { id: 7, studentName: "pooja", scholarshipName: "Begum Hazrat Mahal Scholarship", status: "APPROVED" },
-      { id: 8, studentName: "bhavya", scholarshipName: "CBSE Merit Scholarship", status: "APPROVED" },
-      { id: 9, studentName: "bhanu", scholarshipName: "HDFC Parivartan ECSS", status: "APPROVED" },
-      { id: 10, studentName: "varshu", scholarshipName: "Infosys STEM Stars", status: "APPROVED" }
-    ];
-
-    setScholarships(scholarshipData);
-    setApplications(applicationData);
-
+    fetchData();
   }, []);
 
-  // ✅ STATS
+  const fetchData = async () => {
+    try {
+      const schRes = await API.get("/scholarships");
+      const appRes = await API.get("/applications/all");
+
+      setScholarships(schRes.data);
+      setApplications(appRes.data);
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const pendingApplications = applications.filter(
     (app) => app.status === "PENDING"
   );
@@ -66,66 +43,59 @@ const AdminDashboard = () => {
     0
   );
 
-  // ✅ ADD / UPDATE
-  const handleSubmit = () => {
+  // ADD / UPDATE
+  const handleSubmit = async () => {
+    try {
+      if (editId) {
+        await API.put(`/scholarships/${editId}`, formData);
+        alert("Updated Successfully ✅");
+      } else {
+        await API.post("/scholarships", formData);
+        alert("Added Successfully ✅");
+      }
 
-    if (editId) {
-      const updated = scholarships.map((s) =>
-        s.id === editId ? { ...s, ...formData } : s
-      );
-      setScholarships(updated);
-      alert("Updated Successfully ✅");
-    } else {
-      const newData = {
-        id: scholarships.length + 1,
-        ...formData
-      };
-      setScholarships([...scholarships, newData]);
-      alert("Added Successfully ✅");
+      setFormData({
+        title: "",
+        description: "",
+        provider: "",
+        amount: ""
+      });
+
+      setShowForm(false);
+      setEditId(null);
+
+      fetchData();
+
+    } catch (err) {
+      console.error(err);
     }
-
-    setFormData({
-      title: "",
-      description: "",
-      provider: "",
-      amount: ""
-    });
-
-    setShowForm(false);
-    setEditId(null);
   };
 
-  // ✅ DELETE
-  const handleDelete = (id) => {
+  // DELETE
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure?")) {
-      setScholarships(scholarships.filter((s) => s.id !== id));
+      await API.delete(`/scholarships/${id}`);
+      fetchData();
     }
   };
 
-  // ✅ APPROVE
-  const handleApprove = (id) => {
-    const updated = applications.map((app) =>
-      app.id === id ? { ...app, status: "APPROVED" } : app
-    );
-    setApplications(updated);
+  // APPROVE
+  const handleApprove = async (id) => {
+    await API.put(`/applications/approve/${id}`);
+    fetchData();
   };
 
-  // ✅ REJECT
-  const handleReject = (id) => {
-    const updated = applications.map((app) =>
-      app.id === id ? { ...app, status: "REJECTED" } : app
-    );
-    setApplications(updated);
+  // REJECT
+  const handleReject = async (id) => {
+    await API.put(`/applications/reject/${id}`);
+    fetchData();
   };
 
   return (
     <div>
       <h1>Admin Dashboard</h1>
-      <p className="subtitle">
-        Manage scholarships and review applications
-      </p>
+      <p className="subtitle">Manage scholarships & applications</p>
 
-      {/* STATS */}
       <div className="stats-grid">
         <div className="stat-card">
           <p>Total Scholarships</p>
@@ -138,7 +108,7 @@ const AdminDashboard = () => {
         </div>
 
         <div className="stat-card">
-          <p>Pending Review</p>
+          <p>Pending</p>
           <h2>{pendingApplications.length}</h2>
         </div>
 
